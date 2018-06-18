@@ -1,0 +1,11 @@
+[submodule "coreclr"]
+	path = coreclr
+	url = https://github.com/dotnet/coreclr.git
+	branch = dev/release/2.0.0
+[submodule "corefx"]
+	path = corefx
+	url = https://github.com/dotnet/corefx.git
+	branch = dev/release/2.0.0
+[submodule "tysila"]
+	path = tysila
+	url = https://github.com/jncronin/tysila

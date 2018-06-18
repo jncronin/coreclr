@@ -35,3 +35,4 @@ rulefor(MSCORLIB, [ DOTNETCORLIB ], [ THIS ], function()
 build(MSCORLIB);
 
 include "corefx.tmk";
+include "typeforwards.tmk";

@@ -2,4 +2,17 @@
 
 TYPEFORWARDS = typroject("tysila/typeforwards/typeforwards.csproj");
 
+typroject_setcsc(dir(THIS) + "/coreclr/Tools/dotnetcli/sdk/2.0.0/Roslyn/RunCsc.cmd");
 build(TYPEFORWARDS);
+typroject_setcsc("default");
+
+TFW_FILE = "mscorlib.tfw";
+
+rulefor(TFW_FILE, [], [ ], function()
+{
+	shellcmd("$TYPEFORWARDS . System*.dll " + dir(THIS) + "/coreclr/Tools/dotnetcli/shared/Microsoft.NETCore.App/2.0.0/mscorlib.dll $TFW_FILE");
+});
+
+// Ensure this builds because we don't set any dependencies above
+REBUILD_ALL=1;
+build(TFW_FILE);

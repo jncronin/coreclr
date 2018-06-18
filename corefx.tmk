@@ -59,10 +59,6 @@ function build_corefx(string name)
 	return _o;
 }
 
-setoutputcolor(["cyan"]);
-print("Building corefx\n");
-print("--------------------------------\n");
-
 /* Build some common ones (pulls in others) - see COREFX_LIBDIR for assemblies produced */
 build(build_corefx("System.Console"));
 build(build_corefx("System.IO.FileSystem"));

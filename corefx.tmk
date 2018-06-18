@@ -1,0 +1,69 @@
+/* corefx:
+
+We build a small subset of corefx here (that required to run tysos and
+libtysila).
+
+All of the binaries are placed into a single archive so they can be easily
+included as required */
+
+ROOT = dir(THIS);
+
+export COREFX_LIBDIR = "$ROOT";		// place results here
+autodir(COREFX_LIBDIR);
+corefx_projs = [=];
+
+/* This function generates rules to compile (i.e. produce .dll) files
+	from a particular part of corefx and its dependencies */
+function build_corefx(string name)
+{
+	/* decorate name if it isn't already */
+	if(ext(name) != ".csproj")
+	{
+		name = "corefx/src/" + name + "/src/" + name + ".csproj";
+	}
+
+	if(corefx_projs.containskey(name))
+	{
+		return corefx_projs.get(name);
+	}
+
+	_p = _typroject(name, "Release", "4.6.1", 1, [], [ "mscorlib=$MSCORLIB" ], COREFX_LIBDIR);
+
+	_depends = [];
+	foreach(dep in _p.ProjectReferences)
+	{
+		_depends.add(build_corefx(dep));
+	}
+	foreach(dep in _p.References)
+	{
+		_depends.add(build_corefx("corefx/src/" + dep + "/src/" + dep + ".csproj"));
+	}
+	_depends.add(COREFX_LIBDIR);
+	_depends.add(THIS);
+	_p.add("csc", ROOT + "/coreclr/Tools/dotnetcli/sdk/2.0.0/Roslyn/RunCsc.cmd");
+	_p.add("ExtraTargets", ROOT + "/coreclr/Tools/Build.Common.Targets");
+
+	rulefor(_p.OutputFile, _p.Sources, _depends, function()
+	{
+		_p.Build();
+	});
+
+	_o = COREFX_LIBDIR + "/" + basefname(name) + ".dll";
+	rulefor(_o, [ _p.OutputFile ], [], function()
+	{
+		cp(_RULE_INPUT, _RULE_OUTPUT);
+	});
+
+	corefx_projs.add(name, _o);
+
+	return _o;
+}
+
+setoutputcolor(["cyan"]);
+print("Building corefx\n");
+print("--------------------------------\n");
+
+/* Build some common ones (pulls in others) - see COREFX_LIBDIR for assemblies produced */
+build(build_corefx("System.Console"));
+build(build_corefx("System.IO.FileSystem"));
+

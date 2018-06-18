@@ -1,0 +1,5 @@
+// generate typeforwarders
+
+TYPEFORWARDS = typroject("tysila/typeforwards/typeforwards.csproj");
+
+build(TYPEFORWARDS);

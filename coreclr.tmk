@@ -1,0 +1,37 @@
+// How to build corlib
+
+ROOT = dir(THIS);
+
+DOTNETCORLIB = typroject(ROOT + "/coreclr/src/mscorlib/System.Private.CoreLib.csproj", "Release", "4.6.1", 1, [], [], 0);
+dntp = typrojectfromoutput(DOTNETCORLIB);
+dntp.add("AssemblyName", "mscorlib");
+dntp.add("csc", ROOT + "/coreclr/Tools/dotnetcli/sdk/2.0.0/Roslyn/RunCsc.cmd");
+
+// Utility functions
+export function objfromexe(string exe)
+{
+	return dir(exe) + "/" + basefname(exe) + ".obj";
+}
+export function objfromexe(array exe)
+{
+	ret = [];
+	foreach(e in exe)
+	{
+		ret.add(objfromexe(e));
+	}
+	return ret;
+}
+
+
+/* Copy dotnet corlib output to MSCORLIB */
+export MSCORLIB = "mscorlib.dll";
+export MSCORLIBDIR = dir(MSCORLIB);
+
+rulefor(MSCORLIB, [ DOTNETCORLIB ], [ THIS ], function()
+{
+	cp(DOTNETCORLIB, MSCORLIB);
+});
+
+build(MSCORLIB);
+
+include "corefx.tmk";
